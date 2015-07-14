@@ -15,7 +15,7 @@
 #include "Console.h"
 #include "Datahub.h"
 
-#include <Library/Baselib.h>
+#include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <FrameworkDxe.h>
