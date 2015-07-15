@@ -55,7 +55,9 @@
 #define _FSW_CORE_H_
 
 #include "fsw_base.h"
+// #ifdef __MAKEWITH_GNUEFI
 #include "fsw_efi_base.h"
+// #endif
 
 /** Maximum size for a path, specifically symlink target paths. */
 #define FSW_PATH_MAX (4096)
@@ -66,7 +68,8 @@
 #define FSW_FSTYPE_TABLE_NAME(t) FSW_CONCAT3(fsw_,t,_table)
 
 /** Indicates that the block cache entry is empty. */
-#define FSW_INVALID_BNO 0xFFFFFFFFFFFFFFFF
+//#define FSW_INVALID_BNO 0xFFFFFFFFFFFFFFFF
+#define FSW_INVALID_BNO (~0U)
 
 
 //

@@ -17,8 +17,6 @@
 
 #include "Common.h"
 
-#include <Protocol/ConsoleControl.h>
-
 EFI_STATUS
 EFIAPI
 InitializeConsoleControl (

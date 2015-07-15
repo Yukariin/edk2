@@ -51,6 +51,10 @@
 
 #include "fsw_efi.h"
 #include "fsw_core.h"
+#ifdef __MAKEWITH_GNUEFI
+#include "edk2/DriverBinding.h"
+#include "edk2/ComponentName.h"
+#endif
 #include "refit_call_wrapper.h"
 
 #define DEBUG_LEVEL 0
@@ -67,6 +71,28 @@
 #define DBG(x...)  BootLog(x)
 #else
 #define DBG(x...)
+#endif
+
+#ifdef __MAKEWITH_GNUEFI
+
+#define EFI_DISK_IO_PROTOCOL_GUID \
+  { \
+    0xce345171, 0xba0b, 0x11d2, {0x8e, 0x4f, 0x0, 0xa0, 0xc9, 0x69, 0x72, 0x3b } \
+  }
+
+#define EFI_BLOCK_IO_PROTOCOL_GUID \
+  { \
+    0x964e5b21, 0x6459, 0x11d2, {0x8e, 0x39, 0x0, 0xa0, 0xc9, 0x69, 0x72, 0x3b } \
+  }
+
+EFI_GUID gEfiDriverBindingProtocolGuid = EFI_DRIVER_BINDING_PROTOCOL_GUID;
+EFI_GUID gEfiComponentNameProtocolGuid = EFI_COMPONENT_NAME_PROTOCOL_GUID;
+EFI_GUID gEfiDiskIoProtocolGuid = EFI_DISK_IO_PROTOCOL_GUID;
+EFI_GUID gEfiBlockIoProtocolGuid = EFI_BLOCK_IO_PROTOCOL_GUID;
+EFI_GUID gEfiFileInfoGuid = EFI_FILE_INFO_ID;
+EFI_GUID gEfiFileSystemInfoGuid = EFI_FILE_SYSTEM_INFO_ID;
+EFI_GUID gEfiFileSystemVolumeLabelInfoIdGuid = EFI_FILE_SYSTEM_VOLUME_LABEL_INFO_ID;
+#define SimpleFileSystemProtocol FileSystemProtocol
 #endif
 
 /** Helper macro for stringification. */
@@ -248,6 +274,10 @@ EFI_STATUS EFIAPI fsw_efi_main(IN EFI_HANDLE         ImageHandle,
 
     return EFI_SUCCESS;
 }
+
+#ifdef __MAKEWITH_GNUEFI
+EFI_DRIVER_ENTRY_POINT(fsw_efi_main)
+#endif
 
 /**
  * Driver Binding EFI protocol, Supported function. This function is called by EFI

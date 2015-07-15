@@ -13,6 +13,7 @@
 **/
 
 #include "Console.h"
+#include "ConsoleControl.h"
 
 EFI_STATUS
 EFIAPI
@@ -58,7 +59,10 @@ EFI_CONSOLE_CONTROL_PROTOCOL gConsoleController =
 {
   GetModeImpl,
   SetModeImpl,
+  LockStdInImpl
 };
+
+EFI_GUID gEfiConsoleControlProtocolGuid = EFI_CONSOLE_CONTROL_PROTOCOL_GUID;
 
 /**
   Install ConsoleControl protocol, which is needed for Apple's
@@ -76,7 +80,7 @@ InitializeConsoleControl (
   IN EFI_HANDLE         ImageHandle
   )
 {
-  EFI_STATUS                         Status;
+  EFI_STATUS            Status;
 
   Status = gBS->InstallMultipleProtocolInterfaces (
       &ImageHandle,
@@ -84,6 +88,8 @@ InitializeConsoleControl (
       &gConsoleController,
       NULL
       );
+  ASSERT_EFI_ERROR (Status);
+  DEBUG((EFI_D_INFO, "== Apple ConsoleControl Initialized ==\n"));
 
   return Status;
 }

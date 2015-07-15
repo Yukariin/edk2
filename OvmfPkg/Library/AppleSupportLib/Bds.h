@@ -16,6 +16,6 @@
 #ifndef _APPLESUPPORT_BDS_H_INCLUDED_
 #define _APPLESUPPORT_BDS_H_INCLUDED_
 
-#define EFI_CORESERVICES L"System\\Library\\CoreServices\\boot.efi"
+#define EFI_CORESERVICES L"\\System\\Library\\CoreServices\\boot.efi"
 
 #endif

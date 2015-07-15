@@ -19,27 +19,28 @@ BdsFileSystemLoadImage (
   )
 {
   EFI_STATUS                      Status;
-  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL *FsProtocol;
-  EFI_FILE_PROTOCOL               *Fs;
+  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL *FsVolume;
+  EFI_FILE_HANDLE                 FsRoot;
   EFI_FILE_INFO                   *FileInfo;
-  EFI_FILE_PROTOCOL               *File;
+  EFI_FILE_HANDLE                 File;
   UINTN                           Size;
 
   /* FilePathDevicePath = (FILEPATH_DEVICE_PATH*)RemainingDevicePath; */
 
-  Status = gBS->HandleProtocol (Handle, &gEfiSimpleFileSystemProtocolGuid, (VOID **)&FsProtocol);
+  // Get volume from handle
+  Status = gBS->HandleProtocol (Handle, &gEfiSimpleFileSystemProtocolGuid, (VOID *) &FsVolume);
   if (EFI_ERROR (Status)) {
     return Status;
   }
 
   // Try to Open the volume and get root directory
-  Status = FsProtocol->OpenVolume (FsProtocol, &Fs);
+  Status = FsVolume->OpenVolume (FsVolume, &FsRoot);
   if (EFI_ERROR (Status)) {
     return Status;
   }
 
   File = NULL;
-  Status = Fs->Open (Fs, &File, EFI_CORESERVICES, EFI_FILE_MODE_READ, 0);
+  Status = FsRoot->Open (FsRoot, &File, EFI_CORESERVICES, EFI_FILE_MODE_READ, 0);
   if (EFI_ERROR (Status)) {
     return Status;
   }
@@ -98,7 +99,7 @@ BdsStartEfiApplication (
   // Find the nearest supported file loader
   Status = BdsFileSystemLoadImage (Handle, AllocateAnyPages, &BinaryBuffer, &BinarySize);
   if (EFI_ERROR (Status)) {
-    DEBUG((EFI_D_INFO, "== Bds could not load System image =="));
+    DEBUG((EFI_D_INFO, "== Bds could not load System image ==\n"));
     return Status;
   }
 
@@ -122,13 +123,15 @@ BdsStartEfiApplication (
 EFI_STATUS
 BdsBootApple ()
 {
+  EFI_STATUS                      Status;
   UINTN                           Index;
   UINTN                           TempSize;
   EFI_DEVICE_PATH_PROTOCOL        *TempDevicePath;
   EFI_HANDLE                      *SimpleFileSystemHandles;
   UINTN                           NumberSimpleFileSystemHandles;
+  DEBUG((EFI_D_INFO, "Apple Specific Initialization Start\n"));
 
-  gBS->LocateHandleBuffer (
+  Status = gBS->LocateHandleBuffer (
       ByProtocol,
       &gEfiSimpleFileSystemProtocolGuid,
       NULL,
@@ -136,10 +139,15 @@ BdsBootApple ()
       &SimpleFileSystemHandles
       );
   DEBUG((EFI_D_INFO, "Number Device File System: %d\n", NumberSimpleFileSystemHandles));
+  if (EFI_ERROR (Status)) {
+    DEBUG((EFI_D_ERROR, "LocateHandleBuffer error: %r\n", Status));
+    return Status;
+  }
   for (Index = 0; Index < NumberSimpleFileSystemHandles; Index++) {
     //
     // Get the device path size of SimpleFileSystem handle
     //
+    DEBUG((EFI_D_INFO, "Protocol: %d\n", Index));
     TempDevicePath = DevicePathFromHandle (SimpleFileSystemHandles[Index]);
     TempSize = GetDevicePathSize (TempDevicePath)- sizeof (EFI_DEVICE_PATH_PROTOCOL); // minus the end node
     BdsStartEfiApplication (
@@ -150,5 +158,6 @@ BdsBootApple ()
       //
 
   }
+  DEBUG((EFI_D_INFO, "Apple Specific Initialization End\n"));
   return EFI_SUCCESS;
 }
